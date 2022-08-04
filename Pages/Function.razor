@@ -1,0 +1,31 @@
+﻿@page "/function"
+@inject IHttpClientFactory ClientFactory
+
+<PageTitle>Azure Function</PageTitle>
+
+<h1>Function</h1>
+
+<p role="status">Message: @message</p>
+
+@code {
+    private string url = "https://innovcomponentsfunctionapp.azurewebsites.net/api/HttpExample?name=Test";
+    private string message = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        var client = ClientFactory.CreateClient();
+
+        var response = await client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            using var responseStream = response.Content.ReadAsStringAsync();
+            message = responseStream.Result;
+        }
+        else
+        {
+            message = $"There was an error while calling Azure Function {response.StatusCode} - {response.ReasonPhrase}";
+        }
+    }
+}
